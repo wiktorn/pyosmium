@@ -1,0 +1,135 @@
+#!/usr/bin/python3
+#
+# Copyright (c) 2016, Sarah Hoffmann
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+"""
+Tool for downloading and merging replication changes.
+"""
+
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
+import datetime as dt
+import logging
+import osmium as o
+import osmium.replication.server as rserv
+from osmium.replication import newest_change_from_file
+
+log = logging.getLogger(__name__)
+
+class DiffHandler(o.SimpleHandler):
+
+    def __init__(self, outfile):
+        o.SimpleHandler.__init__(self)
+        self.writer = o.SimpleWriter(outfile)
+
+    def node(self, n):
+        self.writer.add_node(n)
+
+    def way(self, w):
+        self.writer.add_way(w)
+
+    def relation(self, r):
+        self.writer.add_relation(r)
+
+    def close(self):
+        self.writer.close()
+
+def find_start_sequence(svr, options):
+    # try reading from a sequence ID file
+    if options.outfile is not None and options.seqfile is not None:
+        fd = open(options.seqfile, 'r')
+        seqid = fd.readline()
+        fd.close()
+        return int(seqid)
+
+    # sequence ID given, use that one
+    if options.seqid is not None:
+        return options.seqid
+
+    # next try date if given
+    if options.start_date is not None:
+        print(options.start_date)
+        return svr.timestamp_to_sequence(options.start_date)
+
+    # next try base file
+    if options.base_file is not None:
+        start_date = None
+        if options.file_mod is None or options.file_mod == 'lastmod':
+            start_date = newest_change_from_file(options.base_file)
+
+        if start_date is None:
+            raise ValueError("Cannot determine any timestamp from given base file")
+
+        start_date -= dt.timedelta(minutes=options.offset)
+        return svr.timestamp_to_sequence(start_date)
+
+    raise ValueError("You need to choose one of the methods for selecting a start point.")
+
+def parse_datetime(param):
+    seq = dt.datetime.strptime(param, "%Y-%m-%dT%H:%M:%SZ")
+    seq = seq.replace(tzinfo=dt.timezone.utc)
+    return seq
+
+if __name__ == '__main__':
+    parser = ArgumentParser(description=__doc__,
+                            usage='%(prog)s [options] <outfile>',
+                            epilog='If no output file is given, the program only computes and prints the initial sequence ID and then exits immediately. In conjunction with -s, a new sequence ID file will be written.')
+    parser.add_argument('-v', action='store_const', dest='loglevel', const=logging.INFO,
+                        default=logging.WARNING,
+                        help='Enable verbose output.')
+    parser.add_argument('-u', action='store', dest='url',
+                        default='http://planet.openstreetmap.org/replication/minute',
+                        help='URL of the replication service (default: OSM minutely service)')
+    parser.add_argument('-l', action='store', dest='kblimit', default=100*1024,
+                        type=int,
+                        help='Maximum size of diff (in kB), default: 100MB')
+    parser.add_argument('outfile', nargs='?',
+                        help='Diff output file (format is determined by file ending)')
+    startargs = parser.add_argument_group('start sequence arguments',
+                   'Arguments for selecting the start point for download.')
+    startargs.add_argument('-s', action='store', dest='seqfile',
+                        help='File containing the next sequence ID. This will be updated with the new sequence ID after the diff has been sucessfully written.')
+    startargs.add_argument('-i', action='store', dest='seqid', type=int,
+                        help='Sequence ID where to start diff download')
+    startargs.add_argument('-d', action='store', dest='start_date', type=parse_datetime,
+                        help='Timestamp at which to start')
+    startargs.add_argument('-f', action='store', dest='base_file',
+                        help='Get initial timestamp from an OSM file.')
+    startargs.add_argument('-F', action='store', dest='file_mod',
+                        choices=['lastmod'],
+                        help='Method to determine the start sequence from a file.')
+    startargs.add_argument('-o', action='store', dest='offset', type=int,
+                        default=60,
+                        help='Time to subtract from timestamps determined from a base file in minutes (default: 60)')
+
+    options = parser.parse_args()
+    logging.basicConfig(level=options.loglevel, format='%(message)s')
+
+    repserv = rserv.ReplicationServer(options.url)
+
+    seqid = find_start_sequence(repserv, options)
+    log.info("Initial sequence: %d", seqid)
+
+    if options.outfile is None:
+        if options.seqfile is not None:
+            fd = open(options.seqfile, 'w')
+            fd.write('%d\n' % seqid)
+            fd.close()
+        exit(0)
+
+    h = DiffHandler(options.outfile)
+    newseqid = repserv.apply_diffs(h, seqid, options.kblimit)
+    h.close()
+    log.info("Final sequence: %d", newseqid)
+
+    if options.seqfile is not None:
+        fd = open(options.seqfile, 'w')
+        fd.write('%d\n' % newseqid)
+        fd.close()
