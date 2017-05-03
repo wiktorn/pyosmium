@@ -30,7 +30,5 @@ clone_folder: c:\dev\pyosmium
 build_script:
   - cd c:\dev\pyosmium
   - pip install -i https://testpypi.python.org/pypi osmium
-
-test_script:
-  - cd c:\dev\pyosmium\test
-  - %PYTHON%\\python.exe run_tests.py
+  - cd test
+  - python run_tests.py
