@@ -32,13 +32,5 @@ build_script:
   - pip install -i https://testpypi.python.org/pypi osmium
 
 test_script:
-  - set PATH=%BOOST_PREFIX:/=\%\lib;%PATH%
-  - cd test
-  - python run_tests.py
-
-after_test:
-  - cd c:\dev\pyosmium
-  - "%PYTHON%\\python.exe setup.py bdist_wheel"
-
-artifacts:
-  - path: dist\*
+  - cd c:\dev\pyosmium\test
+  - %PYTHON%\\python.exe run_tests.py
