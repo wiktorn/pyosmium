@@ -11,18 +11,6 @@ dist: trusty
 
 matrix:
     include:
-        - os: linux
-          compiler: clang
-          env: USE_PYTHON_VERSION=2
-        - os: linux
-          compiler: clang
-          env: USE_PYTHON_VERSION=3
-        - os: linux
-          compiler: gcc
-          env: USE_PYTHON_VERSION=2
-        - os: linux
-          compiler: gcc
-          env: USE_PYTHON_VERSION=3
         - os: osx
           osx_image: xcode6.4
           compiler: clang
