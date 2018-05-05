@@ -6,6 +6,7 @@ from sys import version_info as pyversion, platform as osplatform
 from ctypes.util import find_library
 import os
 import os.path as osp
+import sys
 
 includes = []
 libs = []
@@ -225,5 +226,11 @@ setup (name = 'osmium',
        package_dir = {'' : 'src'},
        package_data = { 'osmium' : [ '*.dll' ] },
        cmdclass={'sdist' : My_sdist},
-       ext_modules = extensions)
+       ext_modules = extensions,
+       data_files = [
+           ("lib/python{}.{}/site-packages/osmium/".format(*sys.version_info[:2]), ["src/osmium/version.pyi", "src/osmium/index.pyi", "src/osmium/io.pyi", "src/osmium/geom.pyi", "src/osmium/_osmium.pyi", "src/osmium/__init__.pyi"]),
+           ("lib/python{}.{}/site-packages/osmium/replication/".format(*sys.version_info[:2]), ["src/osmium/replication/server.pyi", "src/osmium/replication/_replication.pyi", "src/osmium/replication/__init__.pyi", "src/osmium/replication/utils.pyi"]),
+           ("lib/python{}.{}/site-packages/osmium/osm/".format(*sys.version_info[:2]), ["src/osmium/osm/mutable.pyi", "src/osmium/osm/__init__.pyi", "src/osmium/osm/_osm.pyi"])
+           ],
+       )
 
