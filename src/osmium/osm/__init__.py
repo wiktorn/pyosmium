@@ -1,7 +1,11 @@
+import typing
+
 from ._osm import *
 import osmium.osm.mutable
 
+
 def create_mutable_node(node, **args):
+    # type: (Node, **typing.Any) -> osmium.osm.mutable.Node
     """ Create a mutable node replacing the properties given in the
         named parameters. Note that this function only creates a shallow
         copy which is still bound to the scope of the original object.
@@ -9,6 +13,7 @@ def create_mutable_node(node, **args):
     return osmium.osm.mutable.Node(base=node, **args)
 
 def create_mutable_way(way, **args):
+    # type: (Way, **typing.Any) -> osmium.osm.mutable.Way
     """ Create a mutable way replacing the properties given in the
         named parameters. Note that this function only creates a shallow
         copy which is still bound to the scope of the original object.
@@ -16,6 +21,7 @@ def create_mutable_way(way, **args):
     return osmium.osm.mutable.Way(base=way, **args)
 
 def create_mutable_relation(rel, **args):
+    # type: (Relation, **typing.Any) -> osmium.osm.mutable.Relation
     """ Create a mutable relation replacing the properties given in the
         named parameters. Note that this function only creates a shallow
         copy which is still bound to the scope of the original object.

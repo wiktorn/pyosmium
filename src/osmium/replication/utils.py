@@ -2,16 +2,24 @@
 
 import logging
 import datetime as dt
+import typing
 from collections import namedtuple
 from osmium.io import Reader as oreader
 from sys import version_info as python_version
 
 log = logging.getLogger('pyosmium')
+# type: logging.Logger
+
+Sequence = typing.NewType('Sequence', int)
+Timestamp = typing.NewType('Timestamp', dt.datetime)
 
 ReplicationHeader = namedtuple('ReplicationHeader',
                                 ['url', 'sequence', 'timestamp'])
+# type: typing.NamedTuple('ReplicationHeader', [('url', str), ('sequence', Sequence), ('timestamp', Timestamp)])
+
 
 def get_replication_header(fname):
+    # type: (str) -> ReplicationHeader
     """ Scans the given file for an Osmosis replication header. It returns
         a namedtuple with `url`, `sequence` and `timestamp`. Each or all fields
         may be None, if the piece of information is not avilable. If any of

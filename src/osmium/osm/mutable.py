@@ -1,3 +1,10 @@
+import typing
+
+from ..replication.utils import Timestamp
+from .basetypes import OSMObjectIdType, VersionType, ChangesetId, UidType, LocationType, NodeListType, RelationMembersType
+from . import _osm
+
+
 class OSMObject(object):
     """Mutable version of ``osmium.osm.OSMObject``. It exposes the following
        attributes ``id``, ``version``, ``visible``, ``changeset``, ``timestamp``,
@@ -9,8 +16,16 @@ class OSMObject(object):
        will be initialised first from the attributes of this base object.
     """
 
-    def __init__(self, base=None, id=None, version=None, visible=None, changeset=None,
-            timestamp=None, uid=None, tags=None):
+    def __init__(self,
+                 base=None,  # type: typing.Optional[typing.Any]
+                 id=None,  # type: OSMObjectIdType
+                 version=None,   # type: VersionType
+                 visible=None,  # type: bool
+                 changeset=None,  # type: ChangesetId
+                 timestamp=None,  # type: Timestamp
+                 uid=None,  # type: UidType
+                 tags=None  # type: typing.Union[_osm.TagList, typing.Dict[str, str]]
+                 ):
         if base is None:
             self.id = id
             self.version = version
@@ -36,6 +51,7 @@ class Node(OSMObject):
     """
 
     def __init__(self, base=None, location=None, **attrs):
+        # type: (typing.Optional[typing.Any], LocationType) -> None
         OSMObject.__init__(self, base=base, **attrs)
         if base is None:
             self.location = location
@@ -51,6 +67,7 @@ class Way(OSMObject):
     """
 
     def __init__(self, base=None, nodes=None, **attrs):
+        # type: (typing.Optional[typing.Any], NodeListType) -> None
         OSMObject.__init__(self, base=base, **attrs)
         if base is None:
             self.nodes = nodes
@@ -66,6 +83,7 @@ class Relation(OSMObject):
     """
 
     def __init__(self, base=None, members=None, **attrs):
+        # type: (typing.Optional[typing.Any], RelationMembersType) -> None
         OSMObject.__init__(self, base=base, **attrs)
         if base is None:
             self.members = members

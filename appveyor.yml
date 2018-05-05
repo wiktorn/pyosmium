@@ -3,7 +3,7 @@ environment:
   matrix:
     - PYTHON: "C:\\Python27-x64"
       DEVPACK: pyosmium_libs27-b63.7z
-      PIPINSTALLS: nose wheel mock
+      PIPINSTALLS: nose wheel mock typing
     - PYTHON: "C:\\Python36-x64"
       DEVPACK: pyosmium_libs36-b63.7z
       PIPINSTALLS: nose wheel
