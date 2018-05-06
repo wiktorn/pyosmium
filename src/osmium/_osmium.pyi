@@ -67,4 +67,5 @@ def apply(arg1: Reader, arg2: WriteHandler): ...  # reader, write_handler
 def apply(arg1: Reader, arg2: NodeLocationsForWays): ...  # reader, nodes_idx
 
 
+@typing.overload
 def apply(arg1: Reader, arg2: NodeLocationsForWays, arg3: WriteHandler): ...  # reader, nodes_idx, write_handler

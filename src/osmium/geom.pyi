@@ -21,6 +21,7 @@ class BaseFactory:
     @typing.overload
     def create_point(self, node: Node) -> str: ...
 
+    @typing.overload
     def create_point(self, ref: NodeRef) -> str: ...
 
 
