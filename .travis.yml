@@ -23,6 +23,22 @@ matrix:
         - os: linux
           compiler: gcc
           env: USE_PYTHON_VERSION=3
+        - os: osx
+          osx_image: xcode6.4
+          compiler: clang
+          env: USE_PYTHON_VERSION=2 PYTHON_SUFFIX=2 BOOST_PYTHON_OPTION=
+        - os: osx
+          osx_image: xcode6.4
+          compiler: clang
+          env: USE_PYTHON_VERSION=3 PYTHON_SUFFIX=3 BOOST_PYTHON_OPTION="--with-python3 --without-python"
+        - os: osx
+          osx_image: xcode7
+          compiler: clang
+          env: USE_PYTHON_VERSION=2 PYTHON_SUFFIX= BOOST_PYTHON_OPTION=
+        - os: osx
+          osx_image: xcode7
+          compiler: clang
+          env: USE_PYTHON_VERSION=3 PYTHON_SUFFIX=3 BOOST_PYTHON_OPTION="--with-python3 --without-python"
 
 # http://docs.travis-ci.com/user/apt/
 addons:
@@ -65,6 +81,16 @@ script:
       fi
     - $PYTHON --version
     - $PYTHON setup.py build
+    - $PYTHON setup.py bdist_wheel
     - cd test
     - $PYTHON run_tests.py
 
+deploy:
+  provider: s3
+  skip_cleanup: true
+  acl: public_read
+  region: eu-west-1
+  local_dir: dist
+  access_key_id: ${AWS_ACCESS_KEY_ID}
+  secret_access_key: ${AWS_SECRET}
+  bucket: pyosmium
