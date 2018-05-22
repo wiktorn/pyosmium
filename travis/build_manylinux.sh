@@ -32,16 +32,14 @@ EOF
     export LD_LIBRARY_PATH="${BOOST_PREFIX}/lib:${LD_LIBRARY_PATH}"
     export LIBRARY_PATH="${BOOST_PREFIX}/lib"
 
-    echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
-    ls ${BOOST_PREFIX}/lib
-    echo "End of BOOST libraries list"
     # update ldconfig cache, so find_library will find it
     ldconfig ${BOOST_PREFIX}/lib
     export LIBOSMIUM_PREFIX=/io/libosmium
+    export PROTOZERO_PREFIX=/io/protozero
     cd /io
     rm -rf /io/build
     rm -rf wheelhouse
-    ("${PYBIN}/python" setup.py build || "${PYBIN}/python2" setup.py build || "${PYBIN}/python3" setup.py build)
+    "${PYBIN}/python" setup.py build
     "${PYBIN}/pip" wheel  /io/ -w wheelhouse/
     for whl in wheelhouse/*.whl; do
         auditwheel repair "$whl" -w /io/dist/
