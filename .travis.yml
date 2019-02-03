@@ -51,8 +51,8 @@ install:
     - git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git contrib/libosmium
     - git clone --quiet --depth 1 https://github.com/mapbox/protozero.git contrib/protozero
     - git clone --quiet --depth 1 https://github.com/pybind/pybind11.git contrib/pybind11
-    - python${USE_PYTHON_VERSION} -m venv build_env
-    - python${USE_PYTHON_VERSION} -m venv test_env
+    - virtualenv -p python${USE_PYTHON_VERSION} build_env
+    - virtualenv -p python${USE_PYTHON_VERSION} test_env
     - build_env/bin/pip install -q -r build-requirements.txt
     - test_env/bin/pip install -q -r test-requirements.txt
 
